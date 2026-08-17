@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CloudGuardian AI Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0b0b10;
+      --bg-2: #11111a;
+      --panel: #171722;
+      --panel-soft: #1c1c2a;
+      --panel-glass: rgba(27, 27, 40, 0.8);
+      --ink: #eef0ff;
+      --ink-soft: #b5b8d6;
+      --muted: #7a7ea3;
+      --accent: #726bff;
+      --accent-2: #37d0ff;
+      --accent-3: #ff8a4c;
+      --border: rgba(130, 133, 170, 0.2);
+      --ok: #6dffb7;
+      --err: #ff7b7b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Manrope", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(114, 107, 255, 0.2), transparent 40%),
+        radial-gradient(circle at 90% 0%, rgba(55, 208, 255, 0.2), transparent 35%),
+        radial-gradient(circle at 80% 90%, rgba(255, 138, 76, 0.18), transparent 40%),
+        linear-gradient(180deg, #0a0a10, #0f0f19 60%, #0b0b12 100%);
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .app {
+      width: min(1220px, 100%);
+      display: grid;
+      grid-template-columns: 220px 1fr 260px;
+      gap: 18px;
+      animation: fadeUp 500ms ease-out;
+    }
+
+    .sidebar,
+    .history {
+      background: var(--panel-glass);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 16px;
+      backdrop-filter: blur(8px);
+      min-height: 720px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    .brand span {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #0b0b10;
+      font-weight: 800;
+    }
+
+    .nav {
+      display: grid;
+      gap: 6px;
+    }
+
+    .nav a {
+      color: var(--ink-soft);
+      text-decoration: none;
+      padding: 10px 12px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: transparent;
+      border: 1px solid transparent;
+    }
+
+    .nav a.active,
+    .nav a:hover {
+      background: rgba(114, 107, 255, 0.12);
+      border-color: rgba(114, 107, 255, 0.4);
+      color: var(--ink);
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(114, 107, 255, 0.4);
+      color: var(--accent);
+    }
+
+    .promo {
+      margin-top: 20px;
+      padding: 14px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(114, 107, 255, 0.35), rgba(55, 208, 255, 0.25));
+      border: 1px solid rgba(114, 107, 255, 0.6);
+    }
+
+    .promo button {
+      margin-top: 10px;
+      width: 100%;
+      border: none;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #fff;
+      color: #111124;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .main {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--panel-glass);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px 18px;
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--panel-soft);
+      border-radius: 12px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      min-width: 240px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .workspace {
+      background: var(--panel-glass);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 16px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .workspace-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .tab {
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .tab.active {
+      color: #10101a;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 16px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      min-height: 320px;
+    }
+
+    .panel h2 {
+      margin: 0 0 10px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--ink-soft);
+    }
+
+    input,
+    select,
+    textarea,
+    button {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      font: inherit;
+      color: var(--ink);
+    }
+
+    input,
+    select,
+    textarea {
+      padding: 10px 12px;
+      background: var(--panel-soft);
+      margin-bottom: 12px;
+      transition: border-color 150ms ease, box-shadow 150ms ease;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(114, 107, 255, 0.2);
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(22, 22, 34, 0.6);
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+
+    .toggle input {
+      width: auto;
+      margin: 0;
+      transform: scale(1.1);
+    }
+
+    .submit {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    button {
+      padding: 12px 14px;
+      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+      color: #0f0f19;
+      border: none;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 25px rgba(114, 107, 255, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .status {
+      min-height: 18px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .status.ok {
+      color: var(--ok);
+    }
+
+    .status.err {
+      color: var(--err);
+    }
+
+    .out {
+      background: #0f0f1a;
+      color: #dfe3ff;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 14px;
+      min-height: 320px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12.5px;
+      overflow: auto;
+      line-height: 1.5;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+    }
+
+    .chat-stream {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .bubble {
+      max-width: 92%;
+      padding: 12px 14px;
+      border-radius: 16px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .bubble.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, rgba(114, 107, 255, 0.85), rgba(55, 208, 255, 0.9));
+      color: #0b0b12;
+      border-bottom-right-radius: 6px;
+    }
+
+    .bubble.assistant {
+      align-self: flex-start;
+      background: rgba(255, 255, 255, 0.08);
+      color: #eef0ff;
+      border-bottom-left-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .bubble .meta {
+      display: block;
+      font-size: 10px;
+      opacity: 0.7;
+      margin-bottom: 6px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .history h3 {
+      margin: 0 0 10px;
+      font-size: 14px;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 10px 8px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      color: var(--ink-soft);
+      font-size: 12px;
+    }
+
+    .history-item:hover {
+      background: rgba(114, 107, 255, 0.12);
+      border-color: rgba(114, 107, 255, 0.35);
+    }
+
+    .history-item input {
+      width: auto;
+      margin-top: 3px;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 1100px) {
+      .app {
+        grid-template-columns: 200px 1fr;
+      }
+
+      .history {
+        display: none;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        min-height: auto;
+      }
+
+      .workspace-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><span>CG</span> CloudGuardian</div>
+      <nav class="nav">
+        <a class="active" href="#">AI Console <span class="badge">Live</span></a>
+        <a href="#">Templates</a>
+        <a href="#">Projects <span class="badge">Pro</span></a>
+        <a href="#">Monitoring</a>
+        <a href="#">Settings</a>
+      </nav>
+      <div class="promo">
+        <strong>Operator Pro</strong>
+        <p style="margin:6px 0 0; color: var(--ink-soft); font-size:12px;">Scale triage automation and incident memory.</p>
+        <button type="button">Upgrade</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <h1>AI Incident Helper</h1>
+        <div class="search">Search incidents, services, or runs</div>
+        <div style="font-size:12px; color: var(--muted);">History 6/50</div>
+      </header>
+
+      <section class="workspace">
+        <div class="workspace-header">
+          <div>
+            <div style="font-size:12px; color: var(--muted); letter-spacing:0.08em; text-transform:uppercase;">CloudGuardian AI</div>
+            <div style="font-size:18px; font-weight:700; margin-top:4px;">Operational Response Console</div>
+          </div>
+          <div class="tabs">
+            <div class="tab">Context</div>
+            <div class="tab">Telemetry</div>
+            <div class="tab active">Runbook</div>
+          </div>
+        </div>
+
+        <div class="workspace-grid">
+          <article class="panel">
+            <h2>Request Builder</h2>
+            <form id="analyzeForm">
+              <label for="user_id">User ID</label>
+              <input id="user_id" name="user_id" type="text" value="rahul" required />
+
+              <label for="service_name">Service Name</label>
+              <input id="service_name" name="service_name" type="text" value="payment-service" />
+
+              <label for="workflow">Workflow</label>
+              <select id="workflow" name="workflow" required>
+                <option value="incident">incident</option>
+                <option value="remediation">remediation</option>
+              </select>
+
+              <div class="toggle">
+                <span>Fast mode</span>
+                <input id="fast_mode" name="fast_mode" type="checkbox" checked />
+              </div>
+              <div class="toggle">
+                <span>Simple output (no chat)</span>
+                <input id="simple_mode" name="simple_mode" type="checkbox" />
+              </div>
+              <div class="toggle">
+                <span>Use simple local model (free)</span>
+                <input id="use_simple_model" name="use_simple_model" type="checkbox" />
+              </div>
+
+              <label for="message">Incident Query</label>
+              <textarea id="message" name="message" required>Why is payment service failing?</textarea>
+
+              <div class="submit">
+                <button id="submitBtn" type="submit">Run Analysis</button>
+              </div>
+              <div id="status" class="status"></div>
+            </form>
+          </article>
+
+          <article class="panel">
+            <h2>Response Stream</h2>
+            <div id="chatOutput" class="out chat-stream">
+              <div class="bubble assistant">
+                <span class="meta">CloudGuardian AI</span>
+                Waiting for input...
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <aside class="history">
+      <h3>History</h3>
+      <div class="history-item"><input type="checkbox" /> Payment service latency spike</div>
+      <div class="history-item"><input type="checkbox" /> Auth service 500 storm</div>
+      <div class="history-item"><input type="checkbox" /> Cache eviction anomaly</div>
+      <div class="history-item"><input type="checkbox" /> Gateway TLS renewal</div>
+      <div class="history-item"><input type="checkbox" /> Onboarding: incident workflow</div>
+      <div style="margin-top: 12px; color: var(--muted); font-size: 12px;">Clear history</div>
+    </aside>
+  </div>
+
+  <script>
+    const form = document.getElementById("analyzeForm");
+    const chatOutput = document.getElementById("chatOutput");
+    const statusBox = document.getElementById("status");
+    const submitBtn = document.getElementById("submitBtn");
+    const requestTimeoutMs = 60000;
+
+    function appendBubble(role, content) {
+      const bubble = document.createElement("div");
+      bubble.className = `bubble ${role}`;
+
+      const meta = document.createElement("span");
+      meta.className = "meta";
+      meta.textContent = role === "user" ? "You" : "CloudGuardian AI";
+      bubble.appendChild(meta);
+
+      if (typeof content === "string") {
+        bubble.appendChild(document.createTextNode(content));
+      } else {
+        bubble.appendChild(content);
+      }
+
+      chatOutput.appendChild(bubble);
+      chatOutput.scrollTop = chatOutput.scrollHeight;
+      return bubble;
+    }
+
+    function formatAssistantReply(data) {
+      const wrapper = document.createElement("div");
+
+      const summary = data.summary || data.response?.summary || data.response || "No summary available.";
+      const service = data.service || data.response?.service || form.service_name.value.trim() || "target-service";
+      const mode = data.mode || data.response?.mode || "full";
+      const signals = data.signals || data.response?.signals || {};
+      const nextSteps = data.recommended_next_steps || data.response?.recommended_next_steps || [];
+
+      wrapper.innerHTML = `
+        <div><strong>Status:</strong> ${data.status || "success"}</div>
+        <div><strong>Mode:</strong> ${mode}</div>
+        <div><strong>Service:</strong> ${service}</div>
+        <div style="margin-top:8px;"><strong>Summary:</strong> ${summary}</div>
+      `;
+
+      if (signals.kubernetes || signals.metrics || signals.security) {
+        const details = document.createElement("div");
+        details.style.marginTop = "10px";
+        details.innerHTML = `<strong>Signals:</strong>`;
+        const list = document.createElement("ul");
+        if (signals.kubernetes?.status) {
+          const item = document.createElement("li");
+          item.textContent = `Kubernetes: ${signals.kubernetes.status} (${signals.kubernetes.reason || "no reason"})`;
+          list.appendChild(item);
+        }
+        if (signals.metrics?.cpu_usage) {
+          const item = document.createElement("li");
+          item.textContent = `CPU: ${signals.metrics.cpu_usage}, Memory: ${signals.metrics.memory_usage}, Latency: ${signals.metrics.network_latency}`;
+          list.appendChild(item);
+        }
+        if (signals.security?.threat_detected !== undefined) {
+          const item = document.createElement("li");
+          item.textContent = `Security threat detected: ${signals.security.threat_detected ? "Yes" : "No"}`;
+          list.appendChild(item);
+        }
+        details.appendChild(list);
+        wrapper.appendChild(details);
+      }
+
+      if (Array.isArray(nextSteps) && nextSteps.length) {
+        const steps = document.createElement("div");
+        steps.style.marginTop = "10px";
+        steps.innerHTML = `<strong>Next steps:</strong>`;
+        const list = document.createElement("ul");
+        nextSteps.forEach((step) => {
+          const item = document.createElement("li");
+          item.textContent = step;
+          list.appendChild(item);
+        });
+        steps.appendChild(list);
+        wrapper.appendChild(steps);
+      }
+
+      return wrapper;
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const payload = {
+        user_id: form.user_id.value.trim(),
+        service_name: form.service_name.value.trim(),
+        workflow: form.workflow.value,
+        message: form.message.value.trim(),
+        fast_mode: form.fast_mode.checked,
+        use_simple_model: form.use_simple_model.checked
+      };
+
+      const simpleMode = form.simple_mode && form.simple_mode.checked;
+      if (!simpleMode) appendBubble("user", payload.message);
+      statusBox.textContent = "Running analysis...";
+      statusBox.className = "status";
+      if (!simpleMode) {
+        appendBubble("assistant", "Connecting to backend and running analysis...");
+      } else {
+        // show simple status placeholder
+        chatOutput.innerHTML = '<pre style="color:#d8f9ef;background:#0f2927;padding:12px;border-radius:8px;">Connecting to backend and running analysis...</pre>';
+      }
+      submitBtn.disabled = true;
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), requestTimeoutMs);
+
+      try {
+        const response = await fetch("/analyze", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload),
+          signal: controller.signal
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          const detail = data && data.detail ? data.detail : "Request failed";
+          throw new Error(detail);
+        }
+
+        if (simpleMode) {
+          // display structured JSON or flattened fields in normal form
+          const out = {
+            status: data.status || "success",
+            workflow: payload.workflow,
+            user_id: payload.user_id,
+            mode: data.mode,
+            service: data.service,
+            summary: data.summary,
+            signals: data.signals,
+            recommended_next_steps: data.recommended_next_steps
+          };
+          chatOutput.innerHTML = '<pre style="color:#d8f9ef;background:#0f2927;padding:12px;border-radius:8px;">' + JSON.stringify(out, null, 2) + '</pre>';
+        } else {
+          appendBubble("assistant", formatAssistantReply(data));
+        }
+        statusBox.textContent = "Completed successfully.";
+        statusBox.className = "status ok";
+      } catch (error) {
+        if (error.name === "AbortError") {
+          if (!simpleMode) appendBubble("assistant", "The request took too long. The backend is still processing or the model call is slow. Check the Cloud Shell / Cloud Run logs and try again with a shorter prompt.");
+          else chatOutput.innerHTML = '<pre style="color:#d8f9ef;background:#0f2927;padding:12px;border-radius:8px;">The request timed out after 60 seconds. Backend may still be processing.</pre>';
+          statusBox.textContent = "Timed out after 60 seconds.";
+        } else {
+          if (!simpleMode) appendBubble("assistant", error.message);
+          else chatOutput.innerHTML = '<pre style="color:#d8f9ef;background:#0f2927;padding:12px;border-radius:8px;">Error: ' + (error.message || "Request failed") + '</pre>';
+          statusBox.textContent = "Request failed.";
+        }
+        statusBox.className = "status err";
+      } finally {
+        clearTimeout(timeoutId);
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

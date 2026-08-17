@@ -1,0 +1,13 @@
+google-adk
+google-cloud-aiplatform
+google-cloud-logging
+google-cloud-monitoring
+google-cloud-firestore
+google-generativeai
+fastapi
+uvicorn
+vertexai
+pydantic
+requests
+python-dotenv
+kubernetes
