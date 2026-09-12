@@ -1,6 +1,3 @@
-from google.adk.runners import Runner
-from google.genai.types import Content, Part
-from app.services.session_service import session_service
 from app.services.logging_service import fetch_logs
 from app.services.monitoring_service import get_cpu_utilization
 from app.tools.kubernetes_tool import check_kubernetes_status
@@ -37,6 +34,27 @@ def run_fast_analysis(message: str, service_name: str | None = None) -> dict:
             "Scale the service temporarily if traffic is high",
             "Inspect database or downstream dependency timeouts",
         ],
+        "action_plan": {
+            "decision": "human_review_required",
+            "actions": [
+                {
+                    "type": "restart_service",
+                    "description": "Restart the affected service to clear the current crash-loop state.",
+                    "parameters": {"service": service_name},
+                    "risk_level": "low",
+                    "expected_impact": "Restore availability if the failure is transient.",
+                    "rollback_plan": "No rollback required; observe error rate after restart.",
+                },
+                {
+                    "type": "increase_memory",
+                    "description": "Increase the service memory limit to reduce OOM kills.",
+                    "parameters": {"service": service_name, "memory": "1Gi"},
+                    "risk_level": "medium",
+                    "expected_impact": "Reduce container termination caused by memory pressure.",
+                    "rollback_plan": "Restore the previous memory limit after verification.",
+                },
+            ],
+        },
     }
 
     return result
@@ -71,6 +89,13 @@ async def run_agent(agent, user_id: str, message: str, fast_mode: bool = False, 
     # Simple local model (free) — lightweight text generator using tools
     if use_simple_model:
         return simple_local_model(message, service_name=service_name)
+
+    if agent is None:
+        raise RuntimeError("An ADK agent is required when fast_mode and use_simple_model are disabled")
+
+    from google.adk.runners import Runner
+    from google.genai.types import Content, Part
+    from app.services.session_service import session_service
 
     session = await session_service.create_session(
         app_name=agent.name,

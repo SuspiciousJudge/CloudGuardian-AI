@@ -1,0 +1,24 @@
+# Submission Checklist
+
+- [ ] Working prototype
+- [ ] Localhost demo
+- [ ] AI component
+- [ ] Local inference
+- [ ] Mock data
+- [ ] Incident simulation
+- [ ] Root-cause analysis
+- [ ] Remediation
+- [ ] Benchmark
+- [ ] Snapdragon optimization plan
+- [ ] Qualcomm AI Hub integration path
+- [ ] README
+- [ ] Architecture
+- [ ] Presentation
+- [ ] Demo script
+- [ ] Judging criteria mapping
+- [ ] GitHub repository cleaned
+- [ ] No secrets
+- [ ] No fake claims
+- [ ] Demo tested end-to-end
+- [ ] Screenshots/video can be recorded
+- [ ] Submission materials prepared

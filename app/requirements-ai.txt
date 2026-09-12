@@ -1,0 +1,7 @@
+-r requirements.txt
+google-adk
+google-cloud-aiplatform
+google-cloud-logging
+google-cloud-monitoring
+google-cloud-firestore
+kubernetes

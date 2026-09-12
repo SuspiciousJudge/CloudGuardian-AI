@@ -1,13 +1,14 @@
-google-adk
-google-cloud-aiplatform
-google-cloud-logging
-google-cloud-monitoring
-google-cloud-firestore
-google-generativeai
 fastapi
 uvicorn
-vertexai
 pydantic
 requests
 python-dotenv
-kubernetes
+pytest
+
+# Install these optional AI/cloud dependencies when using the live ADK path:
+# google-adk
+# google-cloud-aiplatform
+# google-cloud-logging
+# google-cloud-monitoring
+# google-cloud-firestore
+# kubernetes

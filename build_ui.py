@@ -1,4 +1,7 @@
-<!doctype html>
+import os
+import textwrap
+
+html_content = """<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -805,4 +808,9 @@ connectSSE();
 
 </script>
 </body>
-</html>
+</html>"""
+
+with open("app/ui/index.html", "w", encoding="utf-8") as f:
+    f.write(html_content)
+
+print(f"Generated index.html successfully with {len(html_content)} bytes.")
